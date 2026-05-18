@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
+
+
 class PageAccueil(QWidget):
     def __init__(self, main_window):
         super().__init__()

@@ -9,7 +9,6 @@ déclenche automatiquement les notifications aux observateurs abonnés
 Auteur : Marine
 """
 
-import os
 
 from __future__ import annotations
 import os

@@ -229,6 +229,29 @@ class Carte:
             if any(al.lower() == allergene_lower for al in a.get_allergenes())
         ]
 
+    def filtrer_sans_allergene(self, allergene: str) -> List[ArticleCarte]:
+        """
+        Retourne tous les articles qui ne contiennent PAS l'allergène donné.
+
+        Args:
+            allergene (str): Nom de l'allergène à éviter.
+
+        Returns:
+            List[ArticleCarte]: Articles sûrs (ne contenant pas l'allergène).
+        """
+        allergene_lower = allergene.lower()
+        articles_sans_allergene = []
+
+        # On utilise ta méthode existante pour parcourir toute la carte d'un coup
+        for article in self.get_tous_les_articles():
+            # On récupère les allergènes de l'article en minuscules
+            allergenes_article = [al.lower() for al in article.get_allergenes()]
+
+            # Si l'allergène ciblé n'est pas dans la liste de l'article, on le garde
+            if allergene_lower not in allergenes_article:
+                articles_sans_allergene.append(article)
+
+        return articles_sans_allergene
     # -----------------------------------------------------------------------
     # Statistiques
     # -----------------------------------------------------------------------

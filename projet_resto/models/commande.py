@@ -9,7 +9,10 @@ déclenche automatiquement les notifications aux observateurs abonnés
 Auteur : Marine
 """
 
+import os
+
 from __future__ import annotations
+import os
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional, Dict, Any
 
@@ -203,13 +206,7 @@ class Commande(Observable):
         Change le statut de la commande et notifie tous les observateurs.
 
         Vérifie que la transition est autorisée selon le cycle de vie
-        défini dans StatutCommande.transitions_autorisees().
-
-        Args:
-            nouveau_statut (StatutCommande): Le statut cible.
-
-        Raises:
-            ValueError: Si la transition est interdite.
+        défini dans StatutCommande.transitions_autorisees(). Génère un tickets de caisse une fois la commande payée.
         """
         if not self.statut.peut_transitionner_vers(nouveau_statut):
             raise ValueError(
@@ -220,7 +217,44 @@ class Commande(Observable):
         if nouveau_statut == StatutCommande.SERVI:
             self.horodatage_service = datetime.now()
 
+        if nouveau_statut == StatutCommande.PAYE:
+            self.generer_ticket()
+
         self.notifier()   # ← déclenche tous les observers abonnés
+
+     # --- Génération de fichiers --------------------------------------------
+
+    def generer_ticket(self) -> None:
+        """
+        Génère un ticket de caisse au format .txt pour cette commande.
+        Le fichier est sauvegardé dans un dossier 'tickets' à la racine du projet.
+        """
+        if not os.path.exists("tickets"):
+            os.makedirs("tickets")
+
+        nom_fichier = f"tickets/ticket_cmd_{self.id_commande}.txt"
+
+        with open(nom_fichier, "w", encoding="utf-8") as f:
+            f.write("====================================\n")
+            f.write("            LE BRESTOIS             \n")
+            f.write("====================================\n")
+            f.write(f"Date    : {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
+            f.write(f"Ticket  : {self.id_commande}\n")
+            f.write(f"Table   : {self.table.numero}\n")
+            f.write(f"Serveur : {self.serveur.get_nom_complet()}\n")
+            f.write("------------------------------------\n")
+
+            for ligne in self.lignes:
+                nom_article = ligne.article.nom.ljust(20)
+                f.write(f"{ligne.quantite}x {nom_article} {ligne.sous_total():.2f} €\n")
+
+            f.write("------------------------------------\n")
+            f.write(f"TOTAL À PAYER :           {self.total():.2f} €\n")
+            f.write("====================================\n")
+            f.write("      Merci de votre visite !       \n")
+
+        print(f"[Système] Ticket généré avec succès : {nom_fichier}")
+
 
     # --- Sérialisation -----------------------------------------------------
 
